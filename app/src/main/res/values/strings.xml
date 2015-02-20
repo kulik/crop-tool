@@ -4,5 +4,7 @@
     <string name="app_name">CropModule3D</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="sdcard_unavailable"/>
+    <string name="msg_cant_attach_image">Cannot attach image</string>
 
 </resources>

@@ -2,17 +2,26 @@ package com.tac.cropmodule3d;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ImageView;
 
+import org.opencv.android.Utils;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+
+import java.util.List;
 
 /**
  * TODO implement javadoc
@@ -135,25 +144,86 @@ public class CropImageView extends ImageView {
         mPins[3] = new Pin(width * 3 / 4, height * 3 / 4, 40);
     }
 
-    public Point pin1() {
-        return mPins[0].point();
+    public void setupAutoPins() {
+        Bitmap bitmap = ((BitmapDrawable) getDrawable()).getBitmap();
+        //get original image Mat;
+        Mat imageMat = new Mat(new Size(bitmap.getWidth(), bitmap.getHeight()), CvType.CV_8UC1);
+        Utils.bitmapToMat(bitmap, imageMat);
+        List<MatOfPoint2f> corners = new TransformationEngine().findCorners(bitmap, imageMat, 0.3f, 20, 2);
+        MatOfPoint2f square = rectangleCornersFrom(corners);
+//        MatOfPoint2f square = corners.get(0);
+
+//        Utils.matToBitmap(corners, bitmap);
+        if (square != null) {
+            Point[] points = square.toArray();
+//            corners.add(points[0]);
+            Size size = imageMat.size();
+            double v = getWidth() / size.width;
+            double h = getHeight() / size.height;
+            Point[] sorted = TransformationEngine.orderPoints(points);
+            mPins[0].x = (int) (sorted[0].x * v);
+            mPins[0].y = (int) (sorted[0].y * h);
+            mPins[1].x = (int) (sorted[1].x * v);
+            mPins[1].y = (int) (sorted[1].y * h);
+            mPins[2].x = (int) (sorted[2].x * v);
+            mPins[2].y = (int) (sorted[2].y * h);
+            mPins[3].x = (int) (sorted[3].x * v);
+            mPins[3].y = (int) (sorted[3].y * h);
+        }
+        setImageBitmap(bitmap);
     }
 
-    public Point pin2() {
-        return mPins[1].point();
+    private MatOfPoint2f rectangleCornersFrom(List<MatOfPoint2f> squares) {
+        if (squares.size() > 0) {
+            double maxSquareArea = -1.0;
+            int maxSquareAreaIndex = -1;
+
+            for (int index = 0; index < squares.size(); index++) {
+                //TODO use abs value
+                double squareArea = Imgproc.contourArea(squares.get(index));
+                if (squareArea > maxSquareArea) {
+                    maxSquareArea = squareArea;
+                    maxSquareAreaIndex = index;
+                }
+            }
+            MatOfPoint2f square = squares.get(maxSquareAreaIndex);
+            return square;
+
+        }
+        return null;
     }
 
-    public Point pin3() {
-        return mPins[2].point();
+    public Pin pin1() {
+        return mPins[0];
     }
 
-    public Point pin4() {
-        return mPins[3].point();
+    public Pin pin2() {
+        return mPins[1];
     }
 
-    private static class Pin {
-        int x;
-        int y;
+    public Pin pin3() {
+        return mPins[2];
+    }
+
+    public Pin pin4() {
+        return mPins[3];
+    }
+
+    public void crop() {
+        Bitmap bitmap = ((BitmapDrawable) getDrawable()).getBitmap();
+        //get original image Mat;
+        Mat imageMat = new Mat();
+        Utils.bitmapToMat(bitmap, imageMat);
+
+        Bitmap output = TransformationEngine.get().initArea(pin1().point(), pin2().point(), pin3().point(), pin4().point())
+                .transform(imageMat);
+
+        setImageBitmap(output);
+    }
+
+    public static class Pin {
+        public volatile int x;
+        public volatile int y;
         int radius;
         Rect touchRect;
 

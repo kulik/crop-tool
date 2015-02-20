@@ -8,6 +8,9 @@ android {
         minSdkVersion 8
         targetSdkVersion 8
     }
+//    sourceSets.main {
+//        jniLibs.srcDir 'src/main/jniLibs'
+//    }
 
     buildTypes {
         release {
