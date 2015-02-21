@@ -2,8 +2,8 @@ package com.tac.cropmodule3d;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -13,7 +13,6 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.List;
@@ -24,6 +23,8 @@ import java.util.List;
 public class CroppingTread extends Thread implements View.OnTouchListener {
     private static final String TAG = CroppingTread.class.getSimpleName();
     private static final int[] DRAWING_LINES = new int[]{1, 3, 2, 0};
+    public static final String PINS_KEY = "pins";
+    private static final String SCALE_KEY = "SCALE_PINS";
     private final SurfaceHolder mHolder;
     private final Paint red;
     private final Paint mTextPaint;
@@ -35,20 +36,22 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
     private volatile Pin mActivePin;
     private int mWidth;
     private int mHeight;
+    private float mScale = 1;
+
     private Object bitmapUseLock = new Object();
-    private float mScale;
+    private Object pinsUseLock = new Object();
 
     public CroppingTread(SurfaceHolder holder, Configuration conf) {
         mConf = conf;
         mHolder = holder;
         red = new Paint();
-        red.setColor(Color.RED);
-        red.setStrokeWidth(3);
+        red.setColor(conf.lineColor);
+        red.setStrokeWidth(conf.lineThinknes);
         red.setTextSize(24);
         red.setAntiAlias(true);
 
         mTextPaint = new Paint();
-        mTextPaint.setColor(Color.WHITE);
+        mTextPaint.setColor(conf.pinTextColor);
         mTextPaint.setTextSize(24);
         mTextPaint.setFakeBoldText(true);
         mTextPaint.setAntiAlias(true);
@@ -60,13 +63,13 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
 
     @Override
     public void run() {
+        Pin[] pins = new Pin[4];
         while (mRunning) {
-            if (mPins == null) {
-                initDefaultPoints();
-            }
-            Pin[] pins = new Pin[4];
-            int active;
-            synchronized (mPins) {
+            int active = -1;
+            synchronized (pinsUseLock) {
+                if (mPins == null) {
+                    initDefaultPoints();
+                }
                 for (int i = 0; i < 4; i++) {
                     Pin pin = mPins[i];
                     pins[i] = new Pin(pin.x, pin.y, pin.radius);
@@ -76,38 +79,47 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
                 }
             }
             Canvas canvas = mHolder.lockCanvas();
-            canvas.drawColor(Color.BLACK);
-            synchronized (bitmapUseLock) {
-                if (mBitmapToCrop != null) {
-                    canvas.save();
-                    canvas.scale(mScale, mScale );
-                    canvas.drawBitmap(mBitmapToCrop, 0, 0, new Paint());
-                    canvas.restore();
+            if (canvas != null) {
+                canvas.drawColor(mConf.backgroundColor);
+                synchronized (bitmapUseLock) {
+                    if (mBitmapToCrop != null) {
+                        canvas.save();
+                        canvas.scale(mScale, mScale);
+                        canvas.drawBitmap(mBitmapToCrop, 0, 0, new Paint());
+                        canvas.restore();
+                    }
                 }
-            }
-            if (mConf.pinDrawable == null) {
-                for (int i = 0; i < 4; i++) {
-                    drawCircle(canvas, pins[i].x, pins[i].y, i);
-//                    canvas.drawRect(pins[i].touchRect, mTextPaint);
+                int dsx = (int) (pins[0].x);
+                int dsy = (int) (pins[0].y);
+                for (int i : DRAWING_LINES) {
+                    canvas.drawLine(pins[i].x, pins[i].y, dsx, dsy, red);
+                    dsx = (int) (pins[i].x);
+                    dsy = (int) (pins[i].y);
                 }
-            } else {
-                for (int i = 0; i < 4; i++) {
-//                    if (mPins ==  active && mConf.pinDrawable instanceof StateListDrawable) {
-//                     mConf.pinDrawable.
-//                    }
+                if (mConf.pinDrawable == null) {
+                    for (int i = 0; i < 4; i++) {
+                        drawCircle(canvas, pins[i].x, pins[i].y, i);
+                    }
+                } else {
+                    for (int i = 0; i < 4; i++) {
+                        if (mConf.pinDrawable.isStateful())
+                            if (i == active) {
+                                mConf.pinDrawable.setState(new int[]{android.R.attr.state_pressed});
+                            } else {
+                                mConf.pinDrawable.setState(new int[]{});
+                            }
+                        int intrinsicHeight = mConf.pinDrawable.getIntrinsicHeight() / 2;
+                        int intrinsicWidth = mConf.pinDrawable.getIntrinsicWidth() / 2;
+                        mConf.pinDrawable.setBounds((int) pins[i].x - intrinsicWidth, (int) pins[i].y - intrinsicHeight, (int) pins[i].x + intrinsicWidth, (int) pins[i].y + intrinsicHeight);
+                        mConf.pinDrawable.draw(canvas);
+
+                    }
                 }
+                mHolder.unlockCanvasAndPost(canvas);
             }
-            int dsx = (int) (pins[0].x);
-            int dsy = (int) (pins[0].y);
-            for (int i : DRAWING_LINES) {
-                canvas.drawLine(pins[i].x, pins[i].y, dsx, dsy, red);
-                dsx = (int) (pins[i].x);
-                dsy = (int) (pins[i].y);
-            }
-            mHolder.unlockCanvasAndPost(canvas);
             try {
                 synchronized (this) {
-                    wait(1000);
+                    wait(100);
                 }
             } catch (InterruptedException e) {
             }
@@ -130,7 +142,6 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
         mPins[2] = new Pin(width / 4, height * 3 / 4, 40);
         mPins[3] = new Pin(width * 3 / 4, height * 3 / 4, 40);
     }
-
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -171,8 +182,13 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
         boolean isTouched = false;
         mActivePin = null;
         for (Pin p : mPins) {
-//            isTouched = p.touchRect.contains((int) x, (int) y);
-            isTouched = (Math.pow(x - p.x, 2) + Math.pow(p.y - y, 2)) < Math.pow(p.radius, 2);
+            float radius;
+            if (mConf.pinDrawable != null) {
+                radius = Math.max(mConf.pinDrawable.getIntrinsicHeight(), mConf.pinDrawable.getIntrinsicWidth()) / 2;
+            } else {
+                radius = p.radius;
+            }
+            isTouched = (Math.pow(x - p.x, 2) + Math.pow(p.y - y, 2)) < Math.pow(radius, 2);
             if (isTouched) {
                 Log.d(TAG, "catched");
                 mActivePin = p;
@@ -205,7 +221,8 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
                 mBitmapToCrop.recycle();
             }
             mBitmapToCrop = bitmapToCrop;
-            mScale = Math.min((float) mWidth / mBitmapToCrop.getWidth(), (float) mHeight / mBitmapToCrop.getHeight());
+            float scale = Math.min((float) mWidth / mBitmapToCrop.getWidth(), (float) mHeight / mBitmapToCrop.getHeight());
+            setNewScale(scale);
         }
     }
 
@@ -226,7 +243,7 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
         //get original image Mat;
         Mat imageMat = new Mat();
         Utils.bitmapToMat(mBitmapToCrop, imageMat);
-        List<MatOfPoint2f> corners = new TransformationEngine().findCorners(mBitmapToCrop, imageMat, 0.3f, 40, 2);
+        List<MatOfPoint2f> corners = new TransformationEngine().findCorners(mBitmapToCrop, imageMat, 0.3f, 80, 2);
         MatOfPoint2f square = rectangleCornersFrom(corners);
 //        MatOfPoint2f square = corners.get(0);
 
@@ -265,26 +282,50 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
         return null;
     }
 
-
-    public static class Pin {
-        public volatile int x;
-        public volatile int y;
-        int radius;
-//        Rect touchRect;
-
-        public Pin(int x, int y, int r) {
-            this.x = x;
-            this.y = y;
-            this.radius = r;
-//            this.touchRect = new Rect(x - radius / 2, y - radius / 2, x + radius / 2, y + radius / 2);
+    public void onSaveInstanceState(Bundle b) {
+        Pin[] pins = new Pin[4];
+        synchronized (pinsUseLock) {
+            int i = 0;
+            for (Pin p : mPins) {
+                pins[i++] = new Pin((int) (p.x / mScale), (int) (p.y / mScale), p.radius);
+            }
         }
+        b.putParcelableArray(PINS_KEY, pins);
+        b.putFloat(SCALE_KEY, mScale);
+    }
 
-        public Point point() {
-            return new Point(x, y);
+
+    public void onRestoreInstanceState(Bundle state) {
+
+        Pin[] pins = (Pin[]) state.getParcelableArray(PINS_KEY);
+        mScale = state.getFloat(SCALE_KEY);
+        synchronized (pinsUseLock) {
+            if (mPins == null) {
+                mPins = new Pin[4];
+            }
+            for (int i = 0; i < mPins.length; i++) {
+                Pin po = pins[i];
+                if (mPins[i] == null) {
+                    mPins[i] = new Pin(po.x * mScale, po.y * mScale, po.radius);
+                } else {
+                    mPins[i].set(po.x * mScale, po.y * mScale, po.radius);
+                }
+            }
         }
+    }
 
-//        public void updateTouch() {
-//            touchRect.set(x - radius / 2, y - radius / 2, x + radius / 2, y + radius / 2);
-//        }
+    public void setNewScale(float newScale) {
+        synchronized (pinsUseLock) {
+            if (mPins != null) {
+                for (int i = 0; i < mPins.length; i++) {
+                    Pin pin = mPins[i];
+                    if (pin != null) {
+                        pin.x = pin.x / mScale * newScale;
+                        pin.y = pin.y / mScale * newScale;
+                    }
+                }
+            }
+            mScale = newScale;
+        }
     }
 }

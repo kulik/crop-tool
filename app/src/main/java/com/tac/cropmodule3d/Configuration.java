@@ -11,4 +11,5 @@ public class Configuration {
     public int pinTextColor;
     public float lineThinknes;
     public int lineColor;
+    public int backgroundColor;
 }

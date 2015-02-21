@@ -74,6 +74,13 @@ public class ImageUtil {
         return selectedBitmap;
     }
 
+    public static int pow2less(int in) {
+        int s = 0;
+        int k = in;
+        while ((s=k&(k-1)) !=0) k=s;
+        return k;
+    }
+
 
     public static Bitmap resizeFitMin(File in, File out, int newW, int newH) throws IOException {
 //        Bitmap bmpOriginal = BitmapFactory.decodeFile(in.getPath());
@@ -88,17 +95,17 @@ public class ImageUtil {
         height = bitmapOptions.outHeight;
         width = bitmapOptions.outWidth;
         float scale = Math.min((float) newH / height, (float) newW / width);
-        int pow2 = (int) (1 / scale);
+        int pow2 = pow2less((int) (1 / scale));
 //        TODO fix power of 2
         bitmapOptions.inSampleSize = pow2;
-
+//        scale = pow2 * scale;
         bitmapOptions.inTempStorage = new byte[32 * 1024];
         bitmapOptions.inJustDecodeBounds = false;
 
         Bitmap bmpOriginal = BitmapFactory.decodeFile(in.getPath(), bitmapOptions);
 
         Matrix m = new Matrix();
-        m.setScale(scale, scale);
+        m.setScale(scale*pow2, scale*pow2);
 //        m.postTranslate(-(width * scale - newW) / 2, -(height * scale - newH) / 2);
         Bitmap b = Bitmap.createBitmap((int) (width*scale), (int)(height*scale), Bitmap.Config.RGB_565);
         Canvas c = new Canvas(b);

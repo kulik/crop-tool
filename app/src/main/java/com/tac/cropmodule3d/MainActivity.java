@@ -128,9 +128,6 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (mMediaRetriver.isMineRequestCode(requestCode)) {
             MediaAttachment ma = mMediaRetriver.processResultImage(requestCode, resultCode, data);
-//            mImageLoader.displayImage(ma.getUri().toString(), mImageView);
-//            Bitmap icon = BitmapFactory.decodeFile(ma.getFile().getPath());
-//            mImageView.setBitmap(icon);
             mImageView.loadUri(ma.getFile().getPath());
         } else {
             super.onActivityResult(requestCode, resultCode, data);
