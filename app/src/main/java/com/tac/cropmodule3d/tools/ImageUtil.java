@@ -90,13 +90,13 @@ public class ImageUtil {
         ParcelFileDescriptor descriptor = null;
         BitmapFactory.decodeFile(in.getPath(), bitmapOptions);
         bitmapOptions.inDither = false;
+        bitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
         int width, height;
 
         height = bitmapOptions.outHeight;
         width = bitmapOptions.outWidth;
         float scale = Math.min((float) newH / height, (float) newW / width);
         int pow2 = pow2less((int) (1 / scale));
-//        TODO fix power of 2
         bitmapOptions.inSampleSize = pow2;
 //        scale = pow2 * scale;
         bitmapOptions.inTempStorage = new byte[32 * 1024];
