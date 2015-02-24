@@ -37,6 +37,7 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
     private CropViewListener mCropListener;
     private PinsSettingListener mPinsListener;
     private String mUri;
+    private Configuration mConf;
 
     public SCropImageView(Context context) {
         super(context);
@@ -82,14 +83,13 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
 
         SurfaceHolder holder = getHolder();
         holder.addCallback(this);
-        mThread = new CroppingTread(holder, conf);
-        setOnTouchListener(mThread);
 
         HandlerThread thread = new HandlerThread("CropView[" + this + "]");
         thread.start();
 
         mServiceLooper = thread.getLooper();
         mHandler = new Handler(mServiceLooper);
+        mConf = conf;
     }
 
     private int getColor(@ColorRes int colorId) {
@@ -98,6 +98,8 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        mThread = new CroppingTread(holder, mConf);
+        setOnTouchListener(mThread);
         mThread.setRunning(true);
         mThread.start();
     }

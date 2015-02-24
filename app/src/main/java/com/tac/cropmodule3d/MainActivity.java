@@ -68,7 +68,6 @@ public class MainActivity extends Activity {
 
         mImageLoader.init(config);
 
-
 //        mImageView = (CropImageView) findViewById(R.id.img);
         mImageView = (SCropImageView) findViewById(R.id.img1);
         mCrop = (Button) findViewById(R.id.btn_do);
