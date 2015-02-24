@@ -1,4 +1,4 @@
-package com.tac.cropmodule3d;
+package com.tac.cropmodule;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -17,8 +17,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.tac.cropmodule3d.tools.FileUtil;
-import com.tac.cropmodule3d.tools.ImageUtil;
+import com.tac.cropmodule.tools.ImageUtil;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,7 +30,7 @@ import java.io.IOException;
 public class SCropImageView extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = SCropImageView.class.getSimpleName();
     private static final String URI_KEY = "URI_KEY";
-    private CroppingTread mThread;
+    private com.tac.cropmodule.CroppingTread mThread;
     private Handler mHandler;
     private Looper mServiceLooper;
     private CropViewListener mCropListener;
@@ -162,15 +161,18 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
         }
     }
 
-    public void crop() {
+    /**
+     * Start cropping assinchronusl
+     * @param fileToSave
+     */
+    public void cropInBackgroung(final File fileToSave) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 Bitmap b = mThread.crop();
-                File tmpFile = new File(FileUtil.getCacheDir(), String.valueOf(System.currentTimeMillis()));
                 try {
-                    tmpFile.createNewFile();
-                    FileOutputStream ostream = new FileOutputStream(tmpFile);
+                    fileToSave.createNewFile();
+                    FileOutputStream ostream = new FileOutputStream(fileToSave);
                     b.compress(Bitmap.CompressFormat.JPEG, 100, ostream);
                     ostream.close();
                 } catch (FileNotFoundException e) {
@@ -180,7 +182,7 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
                 }
 //                pow2less();
                 //TODO save bitmap to file
-                onCropped(tmpFile);
+                onCropped(fileToSave);
             }
         });
     }

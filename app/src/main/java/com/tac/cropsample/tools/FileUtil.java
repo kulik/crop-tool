@@ -1,10 +1,8 @@
-package com.tac.cropmodule3d;
+package com.tac.cropsample.tools;
 
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
-
-import com.tac.cropmodule3d.tools.App;
 
 import java.io.BufferedReader;
 import java.io.File;

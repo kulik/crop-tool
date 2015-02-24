@@ -1,4 +1,4 @@
-package com.tac.cropmodule3d;
+package com.tac.cropmodule;
 
 import android.annotation.TargetApi;
 import android.content.Context;

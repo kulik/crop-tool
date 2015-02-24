@@ -1,4 +1,4 @@
-package com.tac.cropmodule3d.tools;
+package com.tac.cropsample.tools;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -10,9 +10,9 @@ import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.widget.Toast;
 
-import com.tac.cropmodule3d.MediaAttachment;
-import com.tac.cropmodule3d.PatinaFileProvider;
-import com.tac.cropmodule3d.R;
+import com.tac.cropsample.AppFileProvider;
+import com.tac.cropsample.MediaAttachment;
+import com.tac.cropsample.R;
 
 import java.io.File;
 
@@ -43,7 +43,7 @@ public class ImageRetriever {
     public void getImageFromCamera() {
         // TODO Async
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        File picsFile = PatinaFileProvider.getFileForImage();
+        File picsFile = AppFileProvider.getFileForImage();
         if (picsFile != null) {
             mMediaUri = Uri.fromFile(picsFile);
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, mMediaUri);
@@ -61,7 +61,7 @@ public class ImageRetriever {
     public void getVideoFromCamera() {
         // TODO Async
         Intent cameraIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-        File picsFile = PatinaFileProvider.getFileForVideo();
+        File picsFile = AppFileProvider.getFileForVideo();
         if (picsFile != null) {
             mMediaUri = Uri.fromFile(picsFile);
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, mMediaUri);

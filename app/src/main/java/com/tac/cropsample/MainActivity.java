@@ -1,10 +1,7 @@
-package com.tac.cropmodule3d;
+package com.tac.cropsample;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,16 +12,15 @@ import android.widget.ListView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
-import com.tac.cropmodule3d.tools.ImageRetriever;
-import com.tac.cropmodule3d.tools.ImageUtil;
+import com.tac.cropmodule.SCropImageView;
+import com.tac.cropsample.tools.FileUtil;
+import com.tac.cropsample.tools.ImageRetriever;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
 import java.io.File;
-
 
 public class MainActivity extends Activity {
 
@@ -75,7 +71,8 @@ public class MainActivity extends Activity {
         mCrop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mImageView.crop();
+                File tmpFile = new File(FileUtil.getCacheDir(), String.valueOf(System.currentTimeMillis()));
+                mImageView.cropInBackgroung(tmpFile);
             }
         });
 

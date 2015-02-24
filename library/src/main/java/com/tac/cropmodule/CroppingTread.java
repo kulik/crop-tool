@@ -1,4 +1,4 @@
-package com.tac.cropmodule3d;
+package com.tac.cropmodule;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

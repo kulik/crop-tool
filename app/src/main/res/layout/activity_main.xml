@@ -13,7 +13,7 @@
         android:layout_alignParentLeft="true"
         >
         </ListView>
-    <com.tac.cropmodule3d.SCropImageView
+    <com.tac.cropmodule.SCropImageView
         android:layout_toRightOf="@+id/list"
         android:id="@+id/img1"
         android:layout_width="match_parent"
