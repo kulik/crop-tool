@@ -35,6 +35,7 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
     private Looper mServiceLooper;
     private CropViewListener mCropListener;
     private PinsSettingListener mPinsListener;
+    private CropViewLoadListener mLoadListener;
     private String mUri;
     private Configuration mConf;
 
@@ -66,19 +67,21 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
                 R.styleable.CropView,
                 0, 0
         );
+
         Configuration conf = new Configuration();
         try {
             // Retrieve the values from the TypedArray and store into
             // fields of this class.
-            conf.pinDrawable = a.getDrawable(R.styleable.CropView_pinDrawable);
-            conf.lineColor = a.getColor(R.styleable.CropView_lineColor, getColor(android.R.color.holo_red_dark));
-            conf.lineThinknes = a.getDimension(R.styleable.CropView_lineThinkess, 2f);
-            conf.pinTextColor = a.getColor(R.styleable.CropView_textColor, getColor(android.R.color.white));
-            conf.backgroundColor = a.getColor(R.styleable.CropView_backgroundColor, getColor(android.R.color.white));
+            conf.pinDrawable = a.getDrawable(R.styleable.CropView_crPinDrawable);
+            conf.lineColor = a.getColor(R.styleable.CropView_crLineColor, getColor(android.R.color.holo_red_dark));
+            conf.lineThinknes = a.getDimension(R.styleable.CropView_crLineThinkess, 2f);
+            conf.pinTextColor = a.getColor(R.styleable.CropView_crTextColor, getColor(android.R.color.white));
+            conf.backgroundColor = a.getColor(R.styleable.CropView_crBackgroundColor, getColor(android.R.color.white));
         } finally {
             // release the TypedArray so that it can be reused.
             a.recycle();
         }
+        mThread = new CroppingTread(conf);
 
         SurfaceHolder holder = getHolder();
         holder.addCallback(this);
@@ -97,7 +100,7 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        mThread = new CroppingTread(holder, mConf);
+        mThread.setHolder(holder);
         setOnTouchListener(mThread);
         mThread.setRunning(true);
         mThread.start();
@@ -115,6 +118,7 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
         while (retry) {
             try {
                 mThread.join();
+                mThread = new CroppingTread(mConf);
                 retry = false;
             } catch (InterruptedException e) {
                 // try again shutting down the thread
@@ -138,10 +142,13 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
     protected Parcelable onSaveInstanceState() {
         super.onSaveInstanceState();
         Log.i(TAG, "SavedState");
-        Bundle state = new Bundle();
-        mThread.onSaveInstanceState(state);
-        if (mUri != null) {
-            state.putString(URI_KEY, mUri);
+        Bundle state = null;
+        if (mThread != null) {
+            state = new Bundle();
+            mThread.onSaveInstanceState(state);
+            if (mUri != null) {
+                state.putString(URI_KEY, mUri);
+            }
         }
         return state;
     }
@@ -155,7 +162,7 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
             String uri = bundle.getString(URI_KEY, null);
             if (uri != null) {
                 mUri = uri;
-                loadUri(uri);
+                loadPrivate(uri, true, true);
             }
             mThread.onRestoreInstanceState(bundle);
         }
@@ -163,6 +170,7 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
 
     /**
      * Start cropping assinchronusl
+     *
      * @param fileToSave
      */
     public void cropInBackgroung(final File fileToSave) {
@@ -209,17 +217,32 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
         });
     }
 
+    private void onImageLoaded(final boolean successful) {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                if (mLoadListener != null) {
+                    mLoadListener.onImageLoaded(successful);
+                }
+            }
+        });
+    }
+
     public void setupAutoPins() {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 mThread.setupAutoPins();
-
+                onPinsSettedUp();
             }
         });
     }
 
-    public void loadUri(final String uri) {
+    public void loadUri(final String uri, boolean setupAutopins) {
+        loadPrivate(uri, setupAutopins, false);
+    }
+
+    private void loadPrivate(final String uri, final boolean setupAutopins, final boolean innerCall) {
         mUri = uri;
         mHandler.post(new Runnable() {
             @Override
@@ -228,8 +251,17 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
 //                    Bitmap b = ImageUtil.resizeFitMin(new File(Uri.parse(uri).getPath()), null, 2560, 2560);
                     Bitmap b = ImageUtil.resizeFitMin(new File(Uri.parse(uri).getPath()), null, 1200, 1200);
                     setBitmap(b);
+                    if (!innerCall) {
+                        onImageLoaded(true);
+                    }
+                    if (setupAutopins) {
+                        setupAutoPins();
+                    }
                 } catch (IOException e) {
                     Log.e(TAG, "", e);
+                    if (!innerCall) {
+                        onImageLoaded(false);
+                    }
                 }
             }
         });
@@ -243,11 +275,21 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
         mCropListener = cropListener;
     }
 
-    public static interface CropViewListener {
-        void onImageCropped(File tmpFile);
-//        void onImageSaved
+    public void setLoadListener(CropViewLoadListener loadListener) {
+        mLoadListener = loadListener;
     }
 
+    public void setPinsListener(PinsSettingListener pinsListener) {
+        mPinsListener = pinsListener;
+    }
+
+    public static interface CropViewListener {
+        void onImageCropped(File tmpFile);
+    }
+
+    public static interface CropViewLoadListener {
+        void onImageLoaded(boolean successful);
+    }
 
     public static interface PinsSettingListener {
         void onPinsSettedUp();

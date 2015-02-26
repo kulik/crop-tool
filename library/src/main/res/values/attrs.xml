@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CropView">
-        <attr name="textColor" format="color" />
-        <attr name="lineColor" format="color" />
-        <attr name="backgroundColor" format="color" />
-        <attr name="pinDrawable" format="reference" />
-        <attr name="lineThinkess" format="dimension" />
+        <attr name="crTextColor" format="color" />
+        <attr name="crLineColor" format="color" />
+        <attr name="crBackgroundColor" format="color" />
+        <attr name="crPinDrawable" format="reference" />
+        <attr name="crLineThinkess" format="dimension" />
     </declare-styleable>
 
 </resources>

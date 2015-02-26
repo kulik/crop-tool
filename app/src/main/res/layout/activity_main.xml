@@ -19,11 +19,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
-        app:backgroundColor="?attr/colorAccent"
-        app:lineThinkess="2dp"
-        app:lineColor="?attr/colorSwitchThumbNormal"
-        app:textColor="@android:color/holo_blue_bright"
-        app:pinDrawable="@drawable/droid"
+        app:crBackgroundColor="?attr/colorAccent"
+        app:crLineThinkess="2dp"
+        app:crLineColor="?attr/colorSwitchThumbNormal"
+        app:crTextColor="@android:color/holo_blue_bright"
+        app:crPinDrawable="@drawable/droid"
         />
 
     <LinearLayout

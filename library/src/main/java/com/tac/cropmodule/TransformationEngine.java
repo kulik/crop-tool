@@ -229,7 +229,7 @@ public class TransformationEngine {
         return squares;
     }
 
-    public Bitmap processToBW(Bitmap bitmap) {
+    public static Bitmap processToBW(Bitmap bitmap) {
         Mat imageMat = new Mat(bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC1);
         Utils.bitmapToMat(bitmap, imageMat);
         Imgproc.cvtColor(imageMat, imageMat, Imgproc.COLOR_BGR2GRAY);

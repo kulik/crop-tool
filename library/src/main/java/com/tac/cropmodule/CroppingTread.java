@@ -25,7 +25,8 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
     private static final int[] DRAWING_LINES = new int[]{1, 3, 2, 0};
     public static final String PINS_KEY = "pins";
     private static final String SCALE_KEY = "SCALE_PINS";
-    private final SurfaceHolder mHolder;
+
+    private SurfaceHolder mHolder;
     private final Paint red;
     private final Paint mTextPaint;
     private Bitmap mBitmapToCrop;
@@ -41,9 +42,8 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
     private Object bitmapUseLock = new Object();
     private Object pinsUseLock = new Object();
 
-    public CroppingTread(SurfaceHolder holder, Configuration conf) {
+    public CroppingTread(Configuration conf) {
         mConf = conf;
-        mHolder = holder;
         red = new Paint();
         red.setColor(conf.lineColor);
         red.setStrokeWidth(conf.lineThinknes);
@@ -55,6 +55,12 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
         mTextPaint.setTextSize(24);
         mTextPaint.setFakeBoldText(true);
         mTextPaint.setAntiAlias(true);
+    }
+
+
+
+    public void setHolder(SurfaceHolder holder) {
+        mHolder = holder;
     }
 
     public void setRunning(boolean running) {
@@ -286,12 +292,14 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
         Pin[] pins = new Pin[4];
         synchronized (pinsUseLock) {
             int i = 0;
-            for (Pin p : mPins) {
-                pins[i++] = new Pin((int) (p.x / mScale), (int) (p.y / mScale), p.radius);
+            if (mPins != null) {
+                for (Pin p : mPins) {
+                    pins[i++] = new Pin((int) (p.x / mScale), (int) (p.y / mScale), p.radius);
+                }
+                b.putParcelableArray(PINS_KEY, pins);
+                b.putFloat(SCALE_KEY, mScale);
             }
         }
-        b.putParcelableArray(PINS_KEY, pins);
-        b.putFloat(SCALE_KEY, mScale);
     }
 
 

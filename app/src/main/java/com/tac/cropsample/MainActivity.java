@@ -2,6 +2,8 @@ package com.tac.cropsample;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +15,7 @@ import android.widget.ListView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.tac.cropmodule.SCropImageView;
+import com.tac.cropmodule.TransformationEngine;
 import com.tac.cropsample.tools.FileUtil;
 import com.tac.cropsample.tools.ImageRetriever;
 
@@ -115,7 +118,7 @@ public class MainActivity extends Activity {
 //                        mImageView.setBitmap(loadedImage);
 //                    }
 //                });
-                mImageView.loadUri(mArray[position]);
+                mImageView.loadUri(mArray[position], false);
             }
         });
     }
@@ -124,7 +127,7 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (mMediaRetriver.isMineRequestCode(requestCode)) {
             MediaAttachment ma = mMediaRetriver.processResultImage(requestCode, resultCode, data);
-            mImageView.loadUri(ma.getFile().getPath());
+            mImageView.loadUri(ma.getFile().getPath(), false);
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
@@ -165,11 +168,19 @@ public class MainActivity extends Activity {
 //    }
 
     private void bw() {
-//        Bitmap bitmap = ((BitmapDrawable) mImageView.getDrawable()).getBitmap();
-//        //get original image Mat;
-//        Bitmap output = TransformationEngine.get().processToBW(bitmap);
-//
-//        mImageView.setImageBitmap(output);
+
+        //Newer mind just for compile porposes
+        Bitmap bitmap = null;
+        mImageView.setPinsListener(new SCropImageView.PinsSettingListener() {
+            @Override
+            public void onPinsSettedUp() {
+
+            }
+        });
+        //get original image Mat;
+        Bitmap output = TransformationEngine.processToBW(bitmap);
+
+        mImageView.loadUri(output.toString(), true);
     }
 
 
