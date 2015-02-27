@@ -33,10 +33,15 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
     private static final String TAG = SCropImageView.class.getSimpleName();
 
     static {
-        if (!OpenCVLoader.initDebug()) {
-            Log.e(TAG, "some error");
-            // Handle initialization error
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (!OpenCVLoader.initDebug()) {
+                    Log.e(TAG, "some error");
+                    // Handle initialization error
+                }
+            }
+        }).start();
     }
 
     private static final String URI_KEY = "URI_KEY";

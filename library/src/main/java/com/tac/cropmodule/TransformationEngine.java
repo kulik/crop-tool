@@ -56,10 +56,10 @@ public class TransformationEngine {
         double minSum = Integer.MAX_VALUE;
         double maxDiff = Integer.MIN_VALUE;
         double minDiff = Integer.MAX_VALUE;
-        int indexTl = -1;
-        int indexBr = -1;
-        int indexBl = -1;
-        int indexTr = -1;
+        int indexTl = 0;
+        int indexBr = 1;
+        int indexBl = 2;
+        int indexTr = 3;
         for (int i = 0; i < pts.length; i++) {
             Point p = pts[i];
             if ((p.x + p.y) > maxSum) {
@@ -101,10 +101,15 @@ public class TransformationEngine {
         float heightB = (float) Math.sqrt(Math.pow(tl.y - bl.y, 2) + Math.pow(tl.x - bl.x, 2));
         maxHeight = Math.max(heightA, heightB);
 
+//        Point dst1 = new Point(0, 0);
+//        Point dst2 = new Point(maxWidth, 0);
+//        Point dst3 = new Point(maxWidth, maxHeight);
+//        Point dst4 = new Point(0, maxHeight);
+
         Point dst1 = new Point(0, 0);
-        Point dst2 = new Point(maxWidth, 0);
-        Point dst3 = new Point(maxWidth, maxHeight);
-        Point dst4 = new Point(0, maxHeight);
+        Point dst2 = new Point(maxHeight, 0);
+        Point dst3 = new Point(maxHeight, maxWidth);
+        Point dst4 = new Point(0, maxWidth);
 
         Mat dst = getMatFromPoints(dst1, dst2, dst3, dst4);
 

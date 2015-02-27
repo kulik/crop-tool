@@ -37,7 +37,7 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
     private volatile Pin mActivePin;
     private int mWidth;
     private int mHeight;
-    private float mScale = 1;
+    private volatile float mScale = 1;
 
     private Object bitmapUseLock = new Object();
     private Object pinsUseLock = new Object();
@@ -59,7 +59,6 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
             initDefaultPoints();
         }
     }
-
 
 
     public void setHolder(SurfaceHolder holder) {
@@ -207,6 +206,12 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
     public void setDimentions(int width, int height) {
         mWidth = width;
         mHeight = height;
+        synchronized (bitmapUseLock) {
+            if (mBitmapToCrop != null) {
+                float scale = Math.min((float) mWidth / mBitmapToCrop.getWidth(), (float) mHeight / mBitmapToCrop.getHeight());
+                setNewScale(scale);
+            }
+        }
     }
 
     public int getWidth() {
@@ -228,6 +233,9 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
             }
             mBitmapToCrop = bitmapToCrop;
             float scale = Math.min((float) mWidth / mBitmapToCrop.getWidth(), (float) mHeight / mBitmapToCrop.getHeight());
+            if (mPins == null) {
+                initDefaultPoints();
+            }
             setNewScale(scale);
         }
     }
@@ -323,13 +331,19 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
     }
 
     public void setNewScale(float newScale) {
+        newScale = (newScale == 0) ? 1 : newScale;
         synchronized (pinsUseLock) {
             if (mPins != null) {
                 for (int i = 0; i < mPins.length; i++) {
                     Pin pin = mPins[i];
                     if (pin != null) {
-                        pin.x = pin.x / mScale * newScale;
-                        pin.y = pin.y / mScale * newScale;
+                        if (pin.x != 0 && pin.y != 0) {
+                            pin.x = pin.x / mScale * newScale;
+                            pin.y = pin.y / mScale * newScale;
+                        } else {
+                            pin.x = ((i == 0 || i == 2) ? mWidth / 4 : mWidth * 3 / 4);
+                            pin.y = ((i == 0 || i == 1) ? mHeight / 4 : mHeight * 3 / 4);
+                        }
                     }
                 }
             }

@@ -77,7 +77,7 @@ public class ImageUtil {
     public static int pow2less(int in) {
         int s = 0;
         int k = in;
-        while ((s=k&(k-1)) !=0) k=s;
+        while ((s = k & (k - 1)) != 0) k = s;
         return k;
     }
 
@@ -97,7 +97,7 @@ public class ImageUtil {
         width = bitmapOptions.outWidth;
         float scale = Math.min((float) newH / height, (float) newW / width);
         int pow2 = pow2less((int) (1 / scale));
-        bitmapOptions.inSampleSize = pow2;
+        bitmapOptions.inSampleSize = pow2 == 0 ? 1 : pow2;
 //        scale = pow2 * scale;
         bitmapOptions.inTempStorage = new byte[32 * 1024];
         bitmapOptions.inJustDecodeBounds = false;
@@ -105,9 +105,9 @@ public class ImageUtil {
         Bitmap bmpOriginal = BitmapFactory.decodeFile(in.getPath(), bitmapOptions);
 
         Matrix m = new Matrix();
-        m.setScale(scale*pow2, scale*pow2);
+        m.setScale(scale * (pow2 == 0 ? 1 : pow2), scale * (pow2 == 0 ? 1 : pow2));
 //        m.postTranslate(-(width * scale - newW) / 2, -(height * scale - newH) / 2);
-        Bitmap b = Bitmap.createBitmap((int) (width*scale), (int)(height*scale), Bitmap.Config.RGB_565);
+        Bitmap b = Bitmap.createBitmap((int) (width * scale), (int) (height * scale), Bitmap.Config.RGB_565);
         Canvas c = new Canvas(b);
         c.drawBitmap(bmpOriginal, m, new Paint());
 
