@@ -29,7 +29,7 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
     private SurfaceHolder mHolder;
     private final Paint red;
     private final Paint mTextPaint;
-    private Bitmap mBitmapToCrop;
+    private volatile Bitmap mBitmapToCrop;
     // flag to hold game state
     private volatile boolean mRunning;
     private Configuration mConf;
@@ -55,6 +55,9 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
         mTextPaint.setTextSize(24);
         mTextPaint.setFakeBoldText(true);
         mTextPaint.setAntiAlias(true);
+        if (mPins == null) {
+            initDefaultPoints();
+        }
     }
 
 
@@ -73,9 +76,6 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
         while (mRunning) {
             int active = -1;
             synchronized (pinsUseLock) {
-                if (mPins == null) {
-                    initDefaultPoints();
-                }
                 for (int i = 0; i < 4; i++) {
                     Pin pin = mPins[i];
                     pins[i] = new Pin(pin.x, pin.y, pin.radius);
