@@ -95,21 +95,16 @@ public class TransformationEngine {
 
         float widthA = (float) Math.sqrt(Math.pow(br.x - bl.x, 2) + Math.pow(br.y - bl.y, 2));
         float widthB = (float) Math.sqrt(Math.pow(tr.x - tl.x, 2) + Math.pow(tr.y - tl.y, 2));
-        maxWidth = Math.max(widthA, widthB);
+        maxWidth = Math.min(widthA, widthB);
 
         float heightA = (float) Math.sqrt(Math.pow(tr.y - br.y, 2) + Math.pow(tr.x - br.x, 2));
         float heightB = (float) Math.sqrt(Math.pow(tl.y - bl.y, 2) + Math.pow(tl.x - bl.x, 2));
-        maxHeight = Math.max(heightA, heightB);
-
-//        Point dst1 = new Point(0, 0);
-//        Point dst2 = new Point(maxWidth, 0);
-//        Point dst3 = new Point(maxWidth, maxHeight);
-//        Point dst4 = new Point(0, maxHeight);
+        maxHeight = Math.min(heightA, heightB);
 
         Point dst1 = new Point(0, 0);
-        Point dst2 = new Point(maxHeight, 0);
-        Point dst3 = new Point(maxHeight, maxWidth);
-        Point dst4 = new Point(0, maxWidth);
+        Point dst2 = new Point(maxWidth, 0);
+        Point dst3 = new Point(maxWidth, maxHeight);
+        Point dst4 = new Point(0, maxHeight);
 
         Mat dst = getMatFromPoints(dst1, dst2, dst3, dst4);
 

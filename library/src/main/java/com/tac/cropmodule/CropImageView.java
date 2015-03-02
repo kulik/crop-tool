@@ -149,7 +149,7 @@ public class CropImageView extends ImageView {
         //get original image Mat;
         Mat imageMat = new Mat(new Size(bitmap.getWidth(), bitmap.getHeight()), CvType.CV_8UC1);
         Utils.bitmapToMat(bitmap, imageMat);
-        List<MatOfPoint2f> corners = new TransformationEngine().findCorners(bitmap, imageMat, 0.3f, 20, 2);
+        List<MatOfPoint2f> corners = new TransformationEngine().findCorners(bitmap, imageMat, 0.3f, 80, 2);
         MatOfPoint2f square = rectangleCornersFrom(corners);
 //        MatOfPoint2f square = corners.get(0);
 

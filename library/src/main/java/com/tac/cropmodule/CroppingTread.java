@@ -257,7 +257,7 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
         //get original image Mat;
         Mat imageMat = new Mat();
         Utils.bitmapToMat(mBitmapToCrop, imageMat);
-        List<MatOfPoint2f> corners = new TransformationEngine().findCorners(mBitmapToCrop, imageMat, 0.3f, 80, 2);
+        List<MatOfPoint2f> corners = new TransformationEngine().findCorners(mBitmapToCrop, imageMat, 0.3f, 40, 2);
         MatOfPoint2f square = rectangleCornersFrom(corners);
 //        MatOfPoint2f square = corners.get(0);
 
