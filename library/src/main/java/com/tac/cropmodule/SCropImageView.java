@@ -30,6 +30,7 @@ import java.io.IOException;
  * Created by kulik on 17.02.15.
  */
 public class SCropImageView extends SurfaceView implements SurfaceHolder.Callback {
+
     private static final String TAG = SCropImageView.class.getSimpleName();
 
     static {

@@ -29,13 +29,6 @@ public class MainActivity extends Activity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    static {
-        if (!OpenCVLoader.initDebug()) {
-            Log.e(TAG, "some error");
-            // Handle initialization error
-        }
-    }
-
     private SCropImageView mImageView;
     private Button mCrop;
     private ImageRetriever mMediaRetriver;

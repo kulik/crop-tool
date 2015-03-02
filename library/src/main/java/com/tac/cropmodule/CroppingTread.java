@@ -87,7 +87,7 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
             }
             Canvas canvas = mHolder.lockCanvas();
             if (canvas != null) {
-                canvas.drawColor(mConf.backgroundColor);
+//                canvas.drawColor(mConf.backgroundColor);
                 synchronized (bitmapUseLock) {
                     if (mBitmapToCrop != null) {
                         canvas.translate(mTransX, mTransY);
@@ -132,7 +132,7 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
             }
             try {
                 synchronized (this) {
-                    wait(100);
+                    wait(1000);
                 }
             } catch (InterruptedException e) {
             }
