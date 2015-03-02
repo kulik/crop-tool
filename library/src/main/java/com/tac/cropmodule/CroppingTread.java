@@ -37,7 +37,7 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
     private volatile Pin mActivePin;
     private int mWidth;
     private int mHeight;
-    private float mScale = 1;
+    private volatile float mScale = 1;
 
     private Object bitmapUseLock = new Object();
     private Object pinsUseLock = new Object();
@@ -86,7 +86,7 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
             }
             Canvas canvas = mHolder.lockCanvas();
             if (canvas != null) {
-                canvas.drawColor(mConf.backgroundColor);
+//                canvas.drawColor(mConf.backgroundColor);
                 synchronized (bitmapUseLock) {
                     if (mBitmapToCrop != null) {
                         canvas.save();
@@ -125,7 +125,7 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
             }
             try {
                 synchronized (this) {
-                    wait(100);
+                    wait(1000);
                 }
             } catch (InterruptedException e) {
             }
