@@ -2,6 +2,7 @@ package com.tac.cropmodule;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
@@ -90,7 +91,8 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
                     if (mBitmapToCrop != null) {
                         canvas.save();
                         canvas.scale(mScale, mScale);
-                        canvas.drawBitmap(mBitmapToCrop, 0, 0, new Paint());
+                        int top = (canvas.getHeight() - mBitmapToCrop.getHeight()) ;
+                        canvas.drawBitmap(mBitmapToCrop, 0, top, new Paint());
                         canvas.restore();
                     }
                 }
