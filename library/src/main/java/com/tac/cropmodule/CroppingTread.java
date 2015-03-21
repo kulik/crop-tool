@@ -91,8 +91,9 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
                     if (mBitmapToCrop != null) {
                         canvas.save();
                         canvas.scale(mScale, mScale);
-                        int top = (canvas.getHeight() - mBitmapToCrop.getHeight()) ;
-                        canvas.drawBitmap(mBitmapToCrop, 0, top, new Paint());
+                        int top = (int) (((canvas.getHeight() / mScale) - mBitmapToCrop.getHeight()) / 2);
+                        int left= (int) (((canvas.getWidth() / mScale)  - mBitmapToCrop.getWidth())  / 2);
+                        canvas.drawBitmap(mBitmapToCrop, left, top, new Paint());
                         canvas.restore();
                     }
                 }
