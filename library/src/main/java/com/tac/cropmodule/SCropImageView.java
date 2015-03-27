@@ -32,6 +32,19 @@ import java.io.IOException;
 public class SCropImageView extends SurfaceView implements SurfaceHolder.Callback {
 
     private static final String TAG = SCropImageView.class.getSimpleName();
+
+    static {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (!OpenCVLoader.initDebug()) {
+                    Log.e(TAG, "some error");
+                    // Handle initialization error
+                }
+            }
+        }).start();
+    }
+
     private static final String URI_KEY = "URI_KEY";
     private com.tac.cropmodule.CroppingTread mThread;
     private Handler mHandler;

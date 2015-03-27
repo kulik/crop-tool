@@ -29,7 +29,7 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
     private SurfaceHolder mHolder;
     private final Paint red;
     private final Paint mTextPaint;
-    private Bitmap mBitmapToCrop;
+    private volatile Bitmap mBitmapToCrop;
     // flag to hold game state
     private volatile boolean mRunning;
     private Configuration mConf;
@@ -55,8 +55,10 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
         mTextPaint.setTextSize(24);
         mTextPaint.setFakeBoldText(true);
         mTextPaint.setAntiAlias(true);
+        if (mPins == null) {
+            initDefaultPoints();
+        }
     }
-
 
 
     public void setHolder(SurfaceHolder holder) {
@@ -73,9 +75,6 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
         while (mRunning) {
             int active = -1;
             synchronized (pinsUseLock) {
-                if (mPins == null) {
-                    initDefaultPoints();
-                }
                 for (int i = 0; i < 4; i++) {
                     Pin pin = mPins[i];
                     pins[i] = new Pin(pin.x, pin.y, pin.radius);
@@ -207,6 +206,12 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
     public void setDimentions(int width, int height) {
         mWidth = width;
         mHeight = height;
+        synchronized (bitmapUseLock) {
+            if (mBitmapToCrop != null) {
+                float scale = Math.min((float) mWidth / mBitmapToCrop.getWidth(), (float) mHeight / mBitmapToCrop.getHeight());
+                setNewScale(scale);
+            }
+        }
     }
 
     public int getWidth() {
@@ -228,6 +233,9 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
             }
             mBitmapToCrop = bitmapToCrop;
             float scale = Math.min((float) mWidth / mBitmapToCrop.getWidth(), (float) mHeight / mBitmapToCrop.getHeight());
+            if (mPins == null) {
+                initDefaultPoints();
+            }
             setNewScale(scale);
         }
     }
@@ -249,7 +257,7 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
         //get original image Mat;
         Mat imageMat = new Mat();
         Utils.bitmapToMat(mBitmapToCrop, imageMat);
-        List<MatOfPoint2f> corners = new TransformationEngine().findCorners(mBitmapToCrop, imageMat, 0.3f, 80, 2);
+        List<MatOfPoint2f> corners = new TransformationEngine().findCorners(mBitmapToCrop, imageMat, 0.3f, 40, 2);
         MatOfPoint2f square = rectangleCornersFrom(corners);
 //        MatOfPoint2f square = corners.get(0);
 
@@ -323,13 +331,19 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
     }
 
     public void setNewScale(float newScale) {
+        newScale = (newScale == 0) ? 1 : newScale;
         synchronized (pinsUseLock) {
             if (mPins != null) {
                 for (int i = 0; i < mPins.length; i++) {
                     Pin pin = mPins[i];
                     if (pin != null) {
-                        pin.x = pin.x / mScale * newScale;
-                        pin.y = pin.y / mScale * newScale;
+                        if (pin.x != 0 && pin.y != 0) {
+                            pin.x = pin.x / mScale * newScale;
+                            pin.y = pin.y / mScale * newScale;
+                        } else {
+                            pin.x = ((i == 0 || i == 2) ? mWidth / 4 : mWidth * 3 / 4);
+                            pin.y = ((i == 0 || i == 1) ? mHeight / 4 : mHeight * 3 / 4);
+                        }
                     }
                 }
             }
