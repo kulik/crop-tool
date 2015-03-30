@@ -46,7 +46,7 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
     }
 
     private static final String URI_KEY = "URI_KEY";
-    private com.tac.cropmodule.CroppingTread mThread;
+    private CroppingThread mThread;
     private Handler mHandler;
     private Looper mServiceLooper;
     private CropViewListener mCropListener;
@@ -97,7 +97,7 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
             // release the TypedArray so that it can be reused.
             a.recycle();
         }
-        mThread = new CroppingTread(conf);
+        mThread = new CroppingThread(conf);
 
         SurfaceHolder holder = getHolder();
         holder.addCallback(this);
@@ -134,7 +134,7 @@ public class SCropImageView extends SurfaceView implements SurfaceHolder.Callbac
         while (retry) {
             try {
                 mThread.join();
-                mThread = new CroppingTread(mConf);
+                mThread = new CroppingThread(mConf);
                 retry = false;
             } catch (InterruptedException e) {
                 // try again shutting down the thread

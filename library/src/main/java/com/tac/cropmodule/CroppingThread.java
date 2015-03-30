@@ -20,8 +20,8 @@ import java.util.List;
 /**
  * Created by kulik on 17.02.15.
  */
-public class CroppingTread extends Thread implements View.OnTouchListener {
-    private static final String TAG = CroppingTread.class.getSimpleName();
+public class CroppingThread extends Thread implements View.OnTouchListener {
+    private static final String TAG = CroppingThread.class.getSimpleName();
     private static final int[] DRAWING_LINES = new int[]{1, 3, 2, 0};
     public static final String PINS_KEY = "pins";
     private static final String SCALE_KEY = "SCALE_PINS";
@@ -44,7 +44,7 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
     private int mTransX;
     private int mTransY;
 
-    public CroppingTread(Configuration conf) {
+    public CroppingThread(Configuration conf) {
         mConf = conf;
         red = new Paint();
         red.setColor(conf.lineColor);
@@ -87,16 +87,12 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
             }
             Canvas canvas = mHolder.lockCanvas();
             if (canvas != null) {
-//                canvas.drawColor(mConf.backgroundColor);
+                canvas.drawColor(mConf.backgroundColor);
                 synchronized (bitmapUseLock) {
                     if (mBitmapToCrop != null) {
                         canvas.translate(mTransX, mTransY);
                         canvas.save();
                         canvas.scale(mScale, mScale);
-//                        int top = mT;
-// (int) (((canvas.getHeight() / mScale) - mBitmapToCrop.getHeight()) / 2);
-//                        int left = 0;
-//                        (int) (((canvas.getWidth() / mScale) - mBitmapToCrop.getWidth()) / 2);
                         canvas.drawBitmap(mBitmapToCrop, 0, 0, new Paint());
                         canvas.restore();
                     }
