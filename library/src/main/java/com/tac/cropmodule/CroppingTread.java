@@ -2,7 +2,6 @@ package com.tac.cropmodule;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
@@ -42,6 +41,8 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
 
     private Object bitmapUseLock = new Object();
     private Object pinsUseLock = new Object();
+    private int mTransX;
+    private int mTransY;
 
     public CroppingTread(Configuration conf) {
         mConf = conf;
@@ -89,14 +90,18 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
                 canvas.drawColor(mConf.backgroundColor);
                 synchronized (bitmapUseLock) {
                     if (mBitmapToCrop != null) {
+                        canvas.translate(mTransX, mTransY);
                         canvas.save();
                         canvas.scale(mScale, mScale);
-                        int top = (int) (((canvas.getHeight() / mScale) - mBitmapToCrop.getHeight()) / 2);
-                        int left= (int) (((canvas.getWidth() / mScale)  - mBitmapToCrop.getWidth())  / 2);
-                        canvas.drawBitmap(mBitmapToCrop, left, top, new Paint());
+//                        int top = mT;
+// (int) (((canvas.getHeight() / mScale) - mBitmapToCrop.getHeight()) / 2);
+//                        int left = 0;
+//                        (int) (((canvas.getWidth() / mScale) - mBitmapToCrop.getWidth()) / 2);
+                        canvas.drawBitmap(mBitmapToCrop, 0, 0, new Paint());
                         canvas.restore();
                     }
                 }
+
                 int dsx = (int) (pins[0].x);
                 int dsy = (int) (pins[0].y);
                 for (int i : DRAWING_LINES) {
@@ -171,8 +176,8 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
                                 y + r > getHeight()) {
                             return true;
                         }
-                        mActivePin.x = (int) x;
-                        mActivePin.y = (int) y;
+                        mActivePin.x = (int) x - mTransX;
+                        mActivePin.y = (int) y - mTransY;
 //                        mActivePin.updateTouch();
                     }
                 }
@@ -196,7 +201,7 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
             } else {
                 radius = p.radius;
             }
-            isTouched = (Math.pow(x - p.x, 2) + Math.pow(p.y - y, 2)) < Math.pow(radius, 2);
+            isTouched = (Math.pow(x - (p.x + mTransX), 2) + Math.pow(p.y + mTransY - y, 2)) < Math.pow(radius, 2);
             if (isTouched) {
                 Log.d(TAG, "catched");
                 mActivePin = p;
@@ -212,7 +217,9 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
         synchronized (bitmapUseLock) {
             if (mBitmapToCrop != null) {
                 float scale = Math.min((float) mWidth / mBitmapToCrop.getWidth(), (float) mHeight / mBitmapToCrop.getHeight());
-                setNewScale(scale);
+                int transX = (int) ((mWidth - mBitmapToCrop.getWidth() * scale) / 2);
+                int transY = (int) ((mHeight - mBitmapToCrop.getHeight() * scale) / 2);
+                setNewScale(scale, transX, transY);
             }
         }
     }
@@ -236,10 +243,13 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
             }
             mBitmapToCrop = bitmapToCrop;
             float scale = Math.min((float) mWidth / mBitmapToCrop.getWidth(), (float) mHeight / mBitmapToCrop.getHeight());
+            int transX = (int) ((mWidth - mBitmapToCrop.getWidth() * scale) / 2);
+            int transY = (int) ((mHeight - mBitmapToCrop.getHeight() * scale) / 2);
+
             if (mPins == null) {
                 initDefaultPoints();
             }
-            setNewScale(scale);
+            setNewScale(scale, transX, transY);
         }
     }
 
@@ -333,9 +343,11 @@ public class CroppingTread extends Thread implements View.OnTouchListener {
         }
     }
 
-    public void setNewScale(float newScale) {
+    public void setNewScale(float newScale, int transX, int transY) {
         newScale = (newScale == 0) ? 1 : newScale;
         synchronized (pinsUseLock) {
+            mTransX = transX;
+            mTransY = transY;
             if (mPins != null) {
                 for (int i = 0; i < mPins.length; i++) {
                     Pin pin = mPins[i];
