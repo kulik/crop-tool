@@ -262,6 +262,9 @@ public class CroppingThread extends Thread implements View.OnTouchListener {
         return output;
     }
 
+    /**
+     * TODO comment
+     */
     public void setupAutoPins() {
         //get original image Mat;
         Mat imageMat = new Mat();
@@ -352,8 +355,8 @@ public class CroppingThread extends Thread implements View.OnTouchListener {
                             pin.x = pin.x / mScale * newScale;
                             pin.y = pin.y / mScale * newScale;
                         } else {
-                            pin.x = ((i == 0 || i == 2) ? mWidth / 4 : mWidth * 3 / 4);
-                            pin.y = ((i == 0 || i == 1) ? mHeight / 4 : mHeight * 3 / 4);
+                            pin.x = ((i == 0 || i == 2) ? mWidth / 4 : mWidth * 3 / 4) - mTransX;
+                            pin.y = ((i == 0 || i == 1) ? mHeight / 4 : mHeight * 3 / 4) - mTransY;
                         }
                     }
                 }
