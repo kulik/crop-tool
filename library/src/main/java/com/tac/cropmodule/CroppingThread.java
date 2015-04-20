@@ -358,18 +358,15 @@ public class CroppingThread extends Thread implements View.OnTouchListener {
                             int intrinsicHeight;
                             int intrinsicWidth;
                             if (mConf.pinDrawable != null) {
-                                intrinsicHeight = mConf.pinDrawable.getIntrinsicHeight() / 2;
+                                intrinsicHeight = mConf.pinDrawable.getIntrinsicHeight();
                                 intrinsicWidth = mConf.pinDrawable.getIntrinsicWidth() / 2;
                             } else {
-                                intrinsicHeight = pin.radius;
+                                intrinsicHeight = pin.radius * 2;
                                 intrinsicWidth = pin.radius;
                             }
 
-                            pin.x = ((i == 0 || i == 2) ? intrinsicWidth : mWidth - intrinsicWidth);
-                            pin.y = ((i == 0 || i == 1) ? intrinsicHeight : mHeight * newScale - intrinsicHeight);
-                            if (i == 2 || i == 3) {
-                                pin.y = mBitmapToCrop.getHeight() * newScale - intrinsicHeight;
-                            }
+                            pin.x = ((i == 0 || i == 2) ? intrinsicWidth : mBitmapToCrop.getWidth() * newScale - intrinsicWidth);
+                            pin.y = ((i == 0 || i == 1) ? intrinsicHeight : mBitmapToCrop.getHeight() * newScale - intrinsicHeight);
                         }
                     }
                 }
