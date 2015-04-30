@@ -133,7 +133,7 @@ public class TransformationEngine {
         List<MatOfPoint2f> squares = new LinkedList<MatOfPoint2f>();
         // blur will enhance edge detection
         Mat blured = new Mat(imageFrame.size(), CvType.CV_8UC1);
-        Imgproc.medianBlur(imageFrame, blured, 9);
+        Imgproc.GaussianBlur(imageFrame, blured, new Size(9, 9), 2d, 2d);
 
         Mat gray0 = new Mat(blured.size(), CvType.CV_8UC(1));
         Mat gray = new Mat();
