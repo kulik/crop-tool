@@ -239,6 +239,15 @@ public class TransformationEngine {
         return bitmap;
 
     }
+    public static Bitmap processToGray(Bitmap bitmap) {
+        Mat imageMat = new Mat(bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC1);
+        Utils.bitmapToMat(bitmap, imageMat);
+//        Mat gray0 = new Mat(imageMat.size(), CvType.CV_8UC(1));
+        Imgproc.cvtColor(imageMat, imageMat, Imgproc.COLOR_RGB2GRAY);
+        Utils.matToBitmap(imageMat, bitmap);
+        return bitmap;
+
+    }
 
     public static Mat getMatFromPoints(Point... points) {
         List<Point> list = new LinkedList<>();
