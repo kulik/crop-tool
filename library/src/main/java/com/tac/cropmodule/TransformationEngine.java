@@ -233,8 +233,8 @@ public class TransformationEngine {
         Mat imageMat = new Mat(bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC1);
         Utils.bitmapToMat(bitmap, imageMat);
         Imgproc.cvtColor(imageMat, imageMat, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.medianBlur(imageMat, imageMat, 5);
-        Imgproc.adaptiveThreshold(imageMat, imageMat, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 2);
+//        Imgproc.medianBlur(imageMat, imageMat, 5);
+        Imgproc.adaptiveThreshold(imageMat, imageMat, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 127, 1);
         Utils.matToBitmap(imageMat, bitmap);
         return bitmap;
 
