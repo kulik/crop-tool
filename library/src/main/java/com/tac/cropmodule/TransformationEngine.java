@@ -232,9 +232,20 @@ public class TransformationEngine {
     public static Bitmap processToBW(Bitmap bitmap) {
         Mat imageMat = new Mat(bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC1);
         Utils.bitmapToMat(bitmap, imageMat);
-        Imgproc.cvtColor(imageMat, imageMat, Imgproc.COLOR_BGR2GRAY);
+        Mat im_gray = new Mat();
+        Imgproc.cvtColor(imageMat, im_gray, Imgproc.COLOR_BGR2GRAY);
 //        Imgproc.medianBlur(imageMat, imageMat, 5);
-        Imgproc.adaptiveThreshold(imageMat, imageMat, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 127, 1);
+//        cv::Mat im_gray;
+//        cvtColor(origin,im_gray, CV_RGB2GRAY);
+
+//        cv::Mat bw;
+        Mat filtered = new Mat();
+        Imgproc.bilateralFilter(im_gray, filtered, 7, 20, 7);
+
+//        cv::adaptiveThreshold(filtered, bw, 255, CV_ADAPTIVE_THRESH_GAUSSIAN_C, CV_THRESH_BINARY , 11, 2);
+        Imgproc.adaptiveThreshold(filtered, imageMat, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 2);
+
+//        Imgproc.adaptiveThreshold(filtered, imageMat, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 127, 1);
         Utils.matToBitmap(imageMat, bitmap);
         return bitmap;
 
